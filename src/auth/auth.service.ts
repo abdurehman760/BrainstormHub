@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { supabase } from '../config/supabase.config';
-import { User, AuthError } from '@supabase/supabase-js';
 
 @Injectable()
 export class AuthService {
+  constructor(private jwtService: JwtService) {}
+
   // Register a new user
-  async register(email: string, password: string): Promise<User | AuthError> {
+  async register(email: string, password: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -15,11 +17,11 @@ export class AuthService {
       throw new Error(error.message);
     }
 
-    return data?.user;
+    return data?.user; // `data` contains the `user` object
   }
 
   // Login an existing user
-  async login(email: string, password: string): Promise<User | AuthError> {
+  async login(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -29,11 +31,15 @@ export class AuthService {
       throw new Error(error.message);
     }
 
-    return data?.user;
+    // Generate a JWT token after successful login
+    const payload = { sub: data?.user?.id, email: data?.user?.email };
+    const accessToken = this.jwtService.sign(payload);
+
+    return { accessToken }; // Return JWT token
   }
 
-  // Get the current logged-in user
-  async getCurrentUser(): Promise<User | null> {
+  // Get the current logged-in user (using `getUser()` method)
+  async getCurrentUser() {
     const { data, error } = await supabase.auth.getUser();
 
     if (error) {
