@@ -22,22 +22,25 @@ export class BoardsService {
   // Get a single board by ID
   async findOne(id: number) {
     return this.prisma.board.findUnique({
-      where: { id }, // Fetch a specific board by its ID
+      where: {
+        id: Number(id), // Convert id to a number
+      },
     });
   }
-
   // Update a board by ID
   async update(id: number, updateBoardDto: UpdateBoardDto) {
     return this.prisma.board.update({
-      where: { id },
-      data: updateBoardDto, // Update the board with new data
+      where: { id: Number(id) }, // Ensure id is a number
+      data: updateBoardDto, // Spread the update data
     });
   }
+  
 
   // Delete a board by ID
   async remove(id: number) {
-    return this.prisma.board.delete({
-      where: { id }, // Delete the board by its ID
-    });
-  }
+  return this.prisma.board.delete({
+    where: { id: Number(id) }, // Convert to number
+  });
+}
+
 }

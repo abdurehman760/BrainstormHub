@@ -16,6 +16,7 @@ datasource db {
 model Board {
   id        Int      @id @default(autoincrement())
   name      String
+  description String?  // optional field
   createdAt DateTime @default(now())
   ideas     Idea[]   // One board can have many ideas
 }

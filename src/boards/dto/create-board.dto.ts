@@ -5,6 +5,6 @@ export class CreateBoardDto {
     name: string;
   
     // A short description of the board
-    description: string;
+    description?: string; // Include the new field
   }
   
