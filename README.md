@@ -19,7 +19,7 @@
      ```
 
    ### Screenshot:
-   ![Login Endpoint Screenshot](screenshots\Screenshot 2024-12-03 100541.png)
+   ![Login Endpoint Screenshot](screenshots/Screenshot%202024-12-03%20100541.png)
 
 ---
 
@@ -43,7 +43,7 @@
      ```
 
    ### Screenshot:
-   ![Create Board Endpoint Screenshot](screenshots/Screenshot 2024-12-03 100558.png)
+   ![Create Board Endpoint Screenshot](screenshots/Screenshot%202024-12-03%20100558.png)
 
 ---
 
@@ -62,7 +62,7 @@
      ```
 
    ### Screenshot:
-   ![Get Board Endpoint Screenshot](screenshots\Screenshot 2024-12-03 110427.png)
+   ![Get Board Endpoint Screenshot](screenshots/Screenshot%202024-12-03%20110427.png)
 
 ---
 
@@ -80,7 +80,7 @@
      ```
 
    ### Screenshot:
-   ![Get Board by ID Endpoint Screenshot](screenshots\Screenshot 2024-12-03 103941.png)
+   ![Get Board by ID Endpoint Screenshot](screenshots/Screenshot%202024-12-03%20103941.png)
 
 ---
 
@@ -104,7 +104,7 @@
      ```
 
    ### Screenshot:
-   ![Update Board Endpoint Screenshot](screenshots\Screenshot 2024-12-03 103941.png)
+   ![Update Board Endpoint Screenshot](screenshots/Screenshot%202024-12-03%20103941.png)
 
 ---
 
@@ -114,6 +114,6 @@
    - **Response:** `204 No Content`
 
    ### Screenshot:
-   ![Delete Board Endpoint Screenshot](screenshots\Screenshot 2024-12-03 104154.png)
+   ![Delete Board Endpoint Screenshot](screenshots/Screenshot%202024-12-03%20104154.png)
 
 ---
