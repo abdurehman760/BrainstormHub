@@ -18,23 +18,16 @@ model Board {
   name      String
   description String?  // optional field
   createdAt DateTime @default(now())
-  ideas     Idea[]   // One board can have many ideas
+  ideas     Idea[]    // Add this relation field to reference ideas
 }
 
 model Idea {
-  id        Int      @id @default(autoincrement())
-  title     String
-  description String
-  createdAt DateTime @default(now())
-  boardId   Int      // Foreign key for Board
-  board     Board    @relation(fields: [boardId], references: [id])
-  comments  Comment[] // One idea can have many comments
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  boardId     Int
+  createdAt   DateTime @default(now())
+  board       Board    @relation(fields: [boardId], references: [id]) // references the boardId field
 }
 
-model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  ideaId    Int      // Foreign key for Idea
-  idea      Idea     @relation(fields: [ideaId], references: [id])
-}
+
