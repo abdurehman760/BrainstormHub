@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,21 +7,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Board {
-  id        Int      @id @default(autoincrement())
-  name      String
-  description String?  // optional field
-  createdAt DateTime @default(now())
-  ideas     Idea[]    // Add this relation field to reference ideas
+// User model with inverse relations for comments and votes
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  username   String    // Username without uniqueness constraint
+  password   String    // Optional, depending on whether you're using Supabase for login
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  boards     Board[]   // Relation to boards the user owns or is part of
+  comments   Comment[] // Inverse relation for comments
+  votes      Vote[]    // Inverse relation for votes
 }
 
+
+
+// Board model to store boards
+model Board {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   // Optional field
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      Int       // Foreign key to the User who owns the board
+  user        User      @relation(fields: [userId], references: [id])
+  ideas       Idea[]    // Ideas related to the board
+}
+
+// Idea model for ideas within boards
 model Idea {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String?
-  boardId     Int
-  createdAt   DateTime @default(now())
-  board       Board    @relation(fields: [boardId], references: [id]) // references the boardId field
+  boardId     Int       // Foreign key to Board
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  board       Board     @relation(fields: [boardId], references: [id])
+  comments    Comment[] // Comments related to the idea
+  votes       Vote[]    // Track votes on ideas
 }
 
 
+// Comment model for idea comments
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   // Content of the comment
+  createdAt DateTime @default(now())
+  ideaId    Int      // Foreign key to Idea
+  userId    Int      // Foreign key to User
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Vote model for tracking votes on ideas
+model Vote {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  ideaId    Int      // Foreign key to Idea
+  userId    Int      // Foreign key to User who voted
+  value     Int      // Value of the vote (e.g., +1 or -1)
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}

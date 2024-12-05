@@ -9,8 +9,15 @@ export class BoardsService {
 
   // Create a new board
   async create(createBoardDto: CreateBoardDto) {
+    const { userId, ...boardData } = createBoardDto; // Destructure to get userId
+
     return this.prisma.board.create({
-      data: createBoardDto, // Using the DTO to create the board
+      data: {
+        ...boardData,
+        user: {
+          connect: { id: userId }, // Connect the board to the user by userId
+        },
+      },
     });
   }
 
@@ -27,6 +34,7 @@ export class BoardsService {
       },
     });
   }
+
   // Update a board by ID
   async update(id: number, updateBoardDto: UpdateBoardDto) {
     return this.prisma.board.update({
@@ -34,13 +42,11 @@ export class BoardsService {
       data: updateBoardDto, // Spread the update data
     });
   }
-  
 
   // Delete a board by ID
   async remove(id: number) {
-  return this.prisma.board.delete({
-    where: { id: Number(id) }, // Convert to number
-  });
-}
-
+    return this.prisma.board.delete({
+      where: { id: Number(id) }, // Convert to number
+    });
+  }
 }

@@ -1,10 +1,12 @@
-// src/boards/dto/create-board.dto.ts
-
+import { IsString, IsOptional, IsInt } from 'class-validator';
 export class CreateBoardDto {
-    // The name of the board
-    name: string;
-  
-    // A short description of the board
-    description?: string; // Include the new field
-  }
-  
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsInt()
+  userId: number; // Add userId or user object to match the Prisma schema
+}

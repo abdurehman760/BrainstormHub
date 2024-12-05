@@ -1,3 +1,4 @@
+// src/auth/auth.controller.ts
 import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -8,13 +9,15 @@ export class AuthController {
 
   // Register a new user
   @Post('register')
-  async register(@Body() body: { email: string; password: string }) {
-    return await this.authService.register(body.email, body.password);
+  async register(@Body() body: { email: string; password: string; username?: string }) {
+    // Passing the body data to AuthService's register method
+    return await this.authService.register(body.email, body.password, body.username);
   }
 
   // Login an existing user
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
+    // Passing the body data to AuthService's login method
     return await this.authService.login(body.email, body.password);
   }
 
@@ -22,6 +25,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getCurrentUser() {
+    // Fetching the current user from AuthService
     return await this.authService.getCurrentUser();
   }
 }
