@@ -1,19 +1,33 @@
 // src/boards/boards.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Request } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';  
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PrismaService } from '../prisma/prisma.service'; // Import Prisma service
 
-@UseGuards(JwtAuthGuard) 
+@UseGuards(JwtAuthGuard)
 @Controller('boards')
 export class BoardsController {
-  constructor(private readonly boardsService: BoardsService) {}
+  constructor(
+    private readonly boardsService: BoardsService,
+    private readonly prisma: PrismaService // Inject Prisma service
+  ) {}
 
   // Create a new board (Protected)
   @Post()
-  create(@Body() createBoardDto: CreateBoardDto) {
-    return this.boardsService.create(createBoardDto);
+  async create(@Body() createBoardDto: Omit<CreateBoardDto, 'userId'>, @Request() req) {
+    const supabaseId = req.user.sub; // Get Supabase UID from token
+    const user = await this.prisma.user.findUnique({
+      where: { supabaseId },
+    });
+
+    if (!user) {
+      throw new Error('User not found'); // Handle user not found error
+    }
+
+    // Pass the userId from the database to the service
+    return this.boardsService.create({ ...createBoardDto, userId: user.id });
   }
 
   // Get all boards (protected)

@@ -1,4 +1,6 @@
+// src/boards/dto/create-board.dto.ts
 import { IsString, IsOptional, IsInt } from 'class-validator';
+
 export class CreateBoardDto {
   @IsString()
   name: string;
@@ -7,6 +9,7 @@ export class CreateBoardDto {
   @IsString()
   description?: string;
 
+  @IsOptional()  // Make userId optional
   @IsInt()
-  userId: number; // Add userId or user object to match the Prisma schema
+  userId?: number; // Optional userId for programmatic assignment
 }
