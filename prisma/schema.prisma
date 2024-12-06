@@ -7,20 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model with inverse relations for comments and votes
+// User model with Supabase integration
 model User {
-  id         Int       @id @default(autoincrement())
-  email      String    @unique
-  username   String    // Username without uniqueness constraint
-  password   String    // Optional, depending on whether you're using Supabase for login
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  boards     Board[]   // Relation to boards the user owns or is part of
-  comments   Comment[] // Inverse relation for comments
-  votes      Vote[]    // Inverse relation for votes
+  id          Int       @id @default(autoincrement())
+  supabaseId  String    @unique  // Link to Supabase UID
+  email       String    @unique
+  username    String    // Username without uniqueness constraint
+  password    String?   // Optional, depending on Supabase use
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  boards      Board[]   // Relation to boards the user owns or is part of
+  comments    Comment[] // Inverse relation for comments
+  votes       Vote[]    // Inverse relation for votes
 }
-
-
 
 // Board model to store boards
 model Board {
@@ -46,7 +45,6 @@ model Idea {
   comments    Comment[] // Comments related to the idea
   votes       Vote[]    // Track votes on ideas
 }
-
 
 // Comment model for idea comments
 model Comment {

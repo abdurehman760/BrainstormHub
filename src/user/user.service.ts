@@ -1,31 +1,33 @@
-// src/user/user.service.ts
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { User } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service'; 
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  // Create a new user with hashed password
-  async createUser(email: string, password: string, username?: string): Promise<User> {
-    const hashedPassword = await bcrypt.hash(password, 10);
+  // Method to create a user with Supabase ID
+  async createUser(data: {
+    email: string;
+    password: string;
+    username?: string;
+    supabaseId: string;
+  }) {
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(data.password, 10); // 10 is the salt rounds
 
-    // Save user to the database (Prisma)
-    return this.prisma.user.create({
+    // Create a user in Prisma with the hashed password and supabaseId
+    const user = await this.prisma.user.create({
       data: {
-        email,
-        password: hashedPassword,
-        username,
+        email: data.email,
+        password: hashedPassword, // Store the hashed password
+        username: data.username || '', // If no username, store an empty string
+        supabaseId: data.supabaseId, // Store Supabase user ID here
       },
     });
+
+    return user;
   }
 
-  // Find user by email
-  async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
-  }
+  // Additional user-related methods can be added as needed
 }
