@@ -1,4 +1,4 @@
-import {
+import { 
   Controller,
   Get,
   Post,
@@ -14,7 +14,7 @@ import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard) // Apply guard to all routes in this controller
-@Controller() 
+@Controller()
 export class IdeasController {
   constructor(private readonly ideasService: IdeasService) {}
 
@@ -26,7 +26,7 @@ export class IdeasController {
 
   // Create a new idea in a board
   @Post('boards/:boardId/ideas') // Route for creating an idea
-  create(
+  async create(
     @Param('boardId') boardId: number,
     @Body() createIdeaDto: CreateIdeaDto,
   ) {
@@ -35,7 +35,7 @@ export class IdeasController {
 
   // Update an idea by ID
   @Put('ideas/:id') // Route for updating an idea
-  update(
+  async update(
     @Param('id') id: number,
     @Body() updateIdeaDto: UpdateIdeaDto,
   ) {
@@ -44,7 +44,13 @@ export class IdeasController {
 
   // Delete an idea by ID
   @Delete('ideas/:id') // Route for deleting an idea
-  remove(@Param('id') id: number) {
+  async remove(@Param('id') id: number) {
     return this.ideasService.remove(id);
+  }
+
+  // New route for fetching the leaderboard for a board
+  @Get('boards/:boardId/ideas/leaderboard') // Leaderboard route
+  async getLeaderboard(@Param('boardId') boardId: number) {
+    return this.ideasService.getLeaderboard(boardId);
   }
 }

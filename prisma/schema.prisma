@@ -61,9 +61,12 @@ model Comment {
 model Vote {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  ideaId    Int      // Foreign key to Idea
-  userId    Int      // Foreign key to User who voted
-  value     Int      // Value of the vote (e.g., +1 or -1)
+  ideaId    Int
+  userId    Int
+  value     Int
   idea      Idea     @relation(fields: [ideaId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, ideaId]) // Add composite unique constraint
 }
+
