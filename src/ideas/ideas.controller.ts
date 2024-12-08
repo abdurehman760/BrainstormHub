@@ -1,13 +1,4 @@
-import { 
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Put,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
 import { IdeasService } from './ideas.service';
 import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
@@ -52,5 +43,14 @@ export class IdeasController {
   @Get('boards/:boardId/ideas/leaderboard') // Leaderboard route
   async getLeaderboard(@Param('boardId') boardId: number) {
     return this.ideasService.getLeaderboard(boardId);
+  }
+
+  // New route for searching ideas by title or description
+  @Get('boards/:boardId/ideas/search') // Search route
+  async search(
+    @Param('boardId') boardId: number,
+    @Query('query') query: string,
+  ) {
+    return this.ideasService.search(boardId, query);
   }
 }

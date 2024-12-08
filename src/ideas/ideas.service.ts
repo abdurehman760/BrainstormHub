@@ -74,4 +74,19 @@ export class IdeasService {
     // Sort ideas by total votes (descending)
     return leaderboard.sort((a, b) => b.totalVotes - a.totalVotes);
   }
+
+  // Search ideas by title or description
+  async search(boardId: number, query: string) {
+    const parsedBoardId = parseInt(boardId as unknown as string, 10);
+
+    return this.prisma.idea.findMany({
+      where: {
+        boardId: parsedBoardId,
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
 }

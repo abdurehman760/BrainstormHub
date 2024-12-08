@@ -26,6 +26,18 @@ export class BoardsService {
     return this.prisma.board.findMany(); // Fetch all boards
   }
 
+  // Search boards by name or description
+  async search(query: string) {
+    return this.prisma.board.findMany({
+      where: {
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+
   // Get a single board by ID
   async findOne(id: number) {
     return this.prisma.board.findUnique({

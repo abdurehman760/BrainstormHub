@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Request, Query } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -33,6 +33,12 @@ export class BoardsController {
   @Get()
   findAll() {
     return this.boardsService.findAll();
+  }
+
+  // Search boards by name or description
+  @Get('search')
+  async search(@Query('query') query: string) {
+    return this.boardsService.search(query);
   }
 
   // Get a single board by ID (protected)
