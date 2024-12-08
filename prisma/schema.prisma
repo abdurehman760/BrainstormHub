@@ -24,7 +24,7 @@ model User {
 // Board model to store boards
 model Board {
   id          Int       @id @default(autoincrement())
-  name        String
+  title       String    // Updated field
   description String?   // Optional field
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -32,6 +32,7 @@ model Board {
   user        User      @relation(fields: [userId], references: [id])
   ideas       Idea[]    // Ideas related to the board
 }
+
 
 // Idea model for ideas within boards
 model Idea {

@@ -2,7 +2,7 @@
 
 export class UpdateBoardDto {
     // The new name of the board (optional)
-    name?: string;
+    title?: string;
   
     // The new description of the board (optional)
     description?: string;
