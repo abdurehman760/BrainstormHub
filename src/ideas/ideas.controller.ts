@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { IdeasService } from './ideas.service';
 import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
@@ -16,7 +26,7 @@ export class IdeasController {
   }
 
   // Create a new idea in a board
-  @Post('boards/:boardId/ideas') // Route for creating an idea
+  @Post('boards/:boardId/ideas')
   async create(
     @Param('boardId') boardId: number,
     @Body() createIdeaDto: CreateIdeaDto,
@@ -25,28 +35,25 @@ export class IdeasController {
   }
 
   // Update an idea by ID
-  @Put('ideas/:id') // Route for updating an idea
-  async update(
-    @Param('id') id: number,
-    @Body() updateIdeaDto: UpdateIdeaDto,
-  ) {
+  @Put('ideas/:id')
+  async update(@Param('id') id: number, @Body() updateIdeaDto: UpdateIdeaDto) {
     return this.ideasService.update(id, updateIdeaDto);
   }
 
   // Delete an idea by ID
-  @Delete('ideas/:id') // Route for deleting an idea
+  @Delete('ideas/:id')
   async remove(@Param('id') id: number) {
     return this.ideasService.remove(id);
   }
 
   // New route for fetching the leaderboard for a board
-  @Get('boards/:boardId/ideas/leaderboard') // Leaderboard route
+  @Get('boards/:boardId/ideas/leaderboard')
   async getLeaderboard(@Param('boardId') boardId: number) {
     return this.ideasService.getLeaderboard(boardId);
   }
 
   // New route for searching ideas by title or description
-  @Get('boards/:boardId/ideas/search') // Search route
+  @Get('boards/:boardId/ideas/search')
   async search(
     @Param('boardId') boardId: number,
     @Query('query') query: string,

@@ -9,9 +9,15 @@ export class AuthController {
 
   // Register a new user
   @Post('register')
-  async register(@Body() body: { email: string; password: string; username?: string }) {
+  async register(
+    @Body() body: { email: string; password: string; username?: string },
+  ) {
     // Passing the body data to AuthService's register method
-    return await this.authService.register(body.email, body.password, body.username);
+    return await this.authService.register(
+      body.email,
+      body.password,
+      body.username,
+    );
   }
 
   // Login an existing user

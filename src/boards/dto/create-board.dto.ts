@@ -9,7 +9,7 @@ export class CreateBoardDto {
   @IsString()
   description?: string;
 
-  @IsOptional()  // Make userId optional
+  @IsOptional() 
   @IsInt()
-  userId?: number; // Optional userId for programmatic assignment
+  userId?: number; 
 }

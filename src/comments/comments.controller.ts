@@ -1,15 +1,23 @@
-import { Controller, Get, Post, Body, Param, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PrismaService } from '../prisma/prisma.service'; // Import Prisma service
+import { PrismaService } from '../prisma/prisma.service';
 
 @UseGuards(JwtAuthGuard) // Protect the endpoints
 @Controller('ideas')
 export class CommentsController {
   constructor(
     private readonly commentsService: CommentsService,
-    private readonly prisma: PrismaService // Inject Prisma service
+    private readonly prisma: PrismaService,
   ) {}
 
   // Add a comment to an idea (Protected)
@@ -17,7 +25,7 @@ export class CommentsController {
   async create(
     @Param('ideaId') ideaId: number,
     @Body() createCommentDto: CreateCommentDto,
-    @Request() req
+    @Request() req,
   ) {
     const supabaseId = req.user.sub; // Get Supabase UID from token
     const user = await this.prisma.user.findUnique({
@@ -25,11 +33,15 @@ export class CommentsController {
     });
 
     if (!user) {
-      throw new Error('User not found'); // Handle user not found error
+      throw new Error('User not found');
     }
 
     // Pass the userId, ideaId, and content separately
-    return this.commentsService.create(createCommentDto.content, ideaId, user.id);
+    return this.commentsService.create(
+      createCommentDto.content,
+      ideaId,
+      user.id,
+    );
   }
 
   // Get all comments for an idea (Protected)

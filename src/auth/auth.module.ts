@@ -10,7 +10,7 @@ import { UserModule } from 'src/user/user.module';
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY, // Load secret from .env
-      signOptions: { expiresIn: '1h' }, // Token expiration time
+      signOptions: { expiresIn: '1h' }, // Token expiration time 60m
     }),
     UserModule,
   ],
