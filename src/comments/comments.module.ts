@@ -5,7 +5,7 @@ import { CommentsController } from './comments.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ActivityGateway } from 'src/activity/activity.gateway';
+import { ActivityGateway } from '../activity/activity.gateway';
 
 @Module({
   imports: [

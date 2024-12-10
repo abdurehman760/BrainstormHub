@@ -1,4 +1,3 @@
-// src/auth/auth.service.ts
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { supabase } from '../config/supabase.config';
@@ -13,6 +12,12 @@ export class AuthService {
 
   // Register a new user
   async register(email: string, password: string, username?: string) {
+    // Email format validation using regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
     // Create user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -24,7 +29,7 @@ export class AuthService {
     }
 
     // Check if `data` contains the user
-    const supabaseId = data?.user?.id; // user id will be inside data.user
+    const supabaseId = data?.user?.id;
 
     if (!supabaseId) {
       throw new Error('User ID not found in Supabase response');
