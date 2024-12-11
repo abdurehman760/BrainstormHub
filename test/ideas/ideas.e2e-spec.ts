@@ -86,6 +86,19 @@ describe('IdeasController (e2e)', () => {
     expect(response.body[1].title).toBe('Idea 2');
   });
 
+  // Failure Test: Attempt to get all ideas for a non-existent board
+it('should fail to get all ideas for a non-existent board (GET /boards/:boardId/ideas)', async () => {
+  const invalidBoardId = 999999; // Assuming this board ID does not exist
+
+  const response = await request(app.getHttpServer())
+    .get(`/boards/${invalidBoardId}/ideas`)
+    .set('Authorization', `Bearer ${token}`)
+    .expect(404); // Expecting a 404 status for board not found
+
+  expect(response.body.message).toBe('Board not found');
+});
+
+
   // Test: Create a new idea in a board
   it('should create a new idea in a board (POST /boards/:boardId/ideas)', async () => {
     const createIdeaDto = { title: 'New Idea', description: 'Description for the new idea' };
@@ -97,6 +110,20 @@ describe('IdeasController (e2e)', () => {
     expect(response.title).toBe(createIdeaDto.title);
     expect(response.description).toBe(createIdeaDto.description);
     expect(response.boardId).toBe(boardId);
+  });
+
+  // Failure Test: Attempt to create an idea for a non-existent board
+  it('should fail to create an idea for a non-existent board (POST /boards/:boardId/ideas)', async () => {
+    const invalidBoardId = 999999; // Assuming this board ID does not exist
+    const createIdeaDto = { title: 'Invalid Idea', description: 'This board does not exist' };
+
+    const response = await request(app.getHttpServer())
+      .post(`/boards/${invalidBoardId}/ideas`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(createIdeaDto)
+      .expect(404); // Expecting a 404 status for board not found
+
+    expect(response.body.message).toBe('Board not found');
   });
 
   // Test: Update an idea by ID
@@ -113,6 +140,21 @@ describe('IdeasController (e2e)', () => {
     expect(response.body.description).toBe(updateIdeaDto.description);
     expect(response.body.id).toBe(ideaId);
   });
+
+  
+// Failure Test: Attempt to update a non-existent idea
+it('should fail to update a non-existent idea (PUT /ideas/:id)', async () => {
+  const invalidIdeaId = 999999; // Assuming this idea ID does not exist
+  const updateIdeaDto = { title: 'Non-existent Idea', description: 'This idea does not exist' };
+
+  const response = await request(app.getHttpServer())
+    .put(`/ideas/${invalidIdeaId}`)
+    .set('Authorization', `Bearer ${token}`)
+    .send(updateIdeaDto)
+    .expect(404); // Expecting a 404 status for idea not found
+
+  expect(response.body.message).toBe('Idea not found');
+});
 
   // Test: Search for ideas by title or description
   it('should search ideas by title or description (GET /boards/:boardId/ideas/search)', async () => {
@@ -132,6 +174,20 @@ describe('IdeasController (e2e)', () => {
     expect(response.body[0].title).toBe('Searchable Idea');
   });
 
+//Failure Test: Attempt to search for ideas with no results
+  it('should return an empty array when no ideas match the search query (GET /boards/:boardId/ideas/search)', async () => {
+    const nonExistentQuery = 'nonexistentquery'; // A query that is unlikely to match any ideas
+    const boardId = 1; // Assuming this board has no ideas matching the query
+    
+    const response = await request(app.getHttpServer())
+      .get(`/boards/${boardId}/ideas/search?query=${nonExistentQuery}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200); // Expecting a 200 status even if there are no results
+  
+    expect(response.body).toEqual([]); // The response should be an empty array if no ideas match the query
+  });
+  
+
   // Test: Delete an idea by ID
   it('should delete an idea by ID (DELETE /ideas/:id)', async () => {
     await request(app.getHttpServer())
@@ -139,6 +195,18 @@ describe('IdeasController (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(204); // Expecting a 204 status for successful deletion
   });
+  // Failure Test: Attempt to delete a non-existent idea
+it('should fail to delete a non-existent idea (DELETE /ideas/:id)', async () => {
+  const invalidIdeaId = 999999; // Assuming this idea ID does not exist
+
+  const response = await request(app.getHttpServer())
+    .delete(`/ideas/${invalidIdeaId}`)
+    .set('Authorization', `Bearer ${token}`)
+    .expect(404); // Expecting a 404 status for idea not found
+
+  expect(response.body.message).toBe('Idea not found');
+});
+
 
   // Test: Get the leaderboard for a board
   it('should fetch the leaderboard for a board (GET /boards/:boardId/ideas/leaderboard)', async () => {
@@ -147,6 +215,8 @@ describe('IdeasController (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
+  
+
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body.length).toBeGreaterThan(0); // Ensure the leaderboard is not empty
     expect(response.body[0]).toHaveProperty('title'); // Ensure title is present
@@ -154,4 +224,16 @@ describe('IdeasController (e2e)', () => {
     expect(response.body[0]).toHaveProperty('positiveVotes'); // Ensure positiveVotes is present
     expect(response.body[0]).toHaveProperty('negativeVotes'); // Ensure negativeVotes is present
   });
+//Failure Test: Attempt to fetch leaderboard for a board with no ideas
+  it('should fail to fetch leaderboard for a board with no ideas (GET /boards/:boardId/ideas/leaderboard)', async () => {
+    const nonExistentBoardId = 999999; // Assuming this board ID does not exist or has no ideas
+    const response = await request(app.getHttpServer())
+      .get(`/boards/${nonExistentBoardId}/ideas/leaderboard`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404); // Expecting a 404 status for no ideas found
+  
+    expect(response.body.message).toBe('No ideas found for this board');
+  });
+  
+  
 });
