@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ActivityGateway } from '../activity/activity.gateway';
+
+// DTOs (Create and Update Idea DTOs should have types)
+interface CreateIdeaDto {
+  title: string;
+  description: string;
+}
+
+interface UpdateIdeaDto {
+  title?: string;
+  description?: string;
+}
+
 @Injectable()
 export class IdeasService {
   constructor(
@@ -8,9 +20,15 @@ export class IdeasService {
     private readonly activityGateway: ActivityGateway,
   ) {}
 
+  // Utility method to parse boardId and id
+  private parseId(id: string | number): number {
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  }
+
   // Get all ideas for a specific board
   async findAll(boardId: number) {
-    const parsedBoardId = parseInt(boardId as unknown as string, 10);
+    const parsedBoardId = this.parseId(boardId);
+
     return this.prisma.idea.findMany({
       where: {
         boardId: parsedBoardId,
@@ -19,8 +37,8 @@ export class IdeasService {
   }
 
   // Create a new idea in a board
-  async create(boardId: number, createIdeaDto: any) {
-    const parsedBoardId = parseInt(boardId as unknown as string, 10);
+  async create(boardId: number, createIdeaDto: CreateIdeaDto) {
+    const parsedBoardId = this.parseId(boardId);
 
     // Create the idea in the database
     const newIdea = await this.prisma.idea.create({
@@ -39,16 +57,18 @@ export class IdeasService {
       },
     });
 
-    this.activityGateway.sendActivity(
-      `${board?.user.username} created a new idea: ${newIdea.title} in board: ${board?.title}`,
-    );
+    if (board?.user) {
+      this.activityGateway.sendActivity(
+        `${board.user.username} created a new idea: ${newIdea.title} in board: ${board.title}`,
+      );
+    }
 
     return newIdea;
   }
 
   // Update an idea by ID
-  async update(id: number, updateIdeaDto: any) {
-    const parsedId = parseInt(id as unknown as string, 10);
+  async update(id: number, updateIdeaDto: UpdateIdeaDto) {
+    const parsedId = this.parseId(id);
 
     // Update the idea in the database
     const updatedIdea = await this.prisma.idea.update({
@@ -64,16 +84,18 @@ export class IdeasService {
       },
     });
 
-    this.activityGateway.sendActivity(
-      `${board?.user.username} updated idea: ${updatedIdea.title} in board: ${board?.title}`,
-    );
+    if (board?.user) {
+      this.activityGateway.sendActivity(
+        `${board.user.username} updated idea: ${updatedIdea.title} in board: ${board.title}`,
+      );
+    }
 
     return updatedIdea;
   }
 
   // Delete an idea by ID
   async remove(id: number) {
-    const parsedId = parseInt(id as unknown as string, 10);
+    const parsedId = this.parseId(id);
 
     // Delete the idea from the database
     const deletedIdea = await this.prisma.idea.delete({
@@ -88,16 +110,18 @@ export class IdeasService {
       },
     });
 
-    this.activityGateway.sendActivity(
-      `${board?.user.username} deleted idea: ${deletedIdea.title} in board: ${board?.title}`,
-    );
+    if (board?.user) {
+      this.activityGateway.sendActivity(
+        `${board.user.username} deleted idea: ${deletedIdea.title} in board: ${board.title}`,
+      );
+    }
 
     return deletedIdea;
   }
 
   // Get leaderboard for a specific board
   async getLeaderboard(boardId: number) {
-    const parsedBoardId = parseInt(boardId as unknown as string, 10);
+    const parsedBoardId = this.parseId(boardId);
 
     const ideas = await this.prisma.idea.findMany({
       where: { boardId: parsedBoardId },
@@ -109,12 +133,8 @@ export class IdeasService {
     // Compute total, positive, and negative votes for each idea
     const leaderboard = ideas.map((idea) => {
       const totalVotes = idea.votes.reduce((sum, vote) => sum + vote.value, 0);
-      const positiveVotes = idea.votes.filter(
-        (vote) => vote.value === 1,
-      ).length;
-      const negativeVotes = idea.votes.filter(
-        (vote) => vote.value === -1,
-      ).length;
+      const positiveVotes = idea.votes.filter((vote) => vote.value === 1).length;
+      const negativeVotes = idea.votes.filter((vote) => vote.value === -1).length;
 
       return {
         id: idea.id,
@@ -132,7 +152,7 @@ export class IdeasService {
 
   // Search ideas by title or description
   async search(boardId: number, query: string) {
-    const parsedBoardId = parseInt(boardId as unknown as string, 10);
+    const parsedBoardId = this.parseId(boardId);
 
     return this.prisma.idea.findMany({
       where: {

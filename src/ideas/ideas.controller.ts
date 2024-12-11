@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { IdeasService } from './ideas.service';
 import { CreateIdeaDto } from './dto/create-idea.dto';
@@ -42,17 +43,18 @@ export class IdeasController {
 
   // Delete an idea by ID
   @Delete('ideas/:id')
+  @HttpCode(204) 
   async remove(@Param('id') id: number) {
     return this.ideasService.remove(id);
   }
 
-  // New route for fetching the leaderboard for a board
+  //  route for fetching the leaderboard for a board
   @Get('boards/:boardId/ideas/leaderboard')
   async getLeaderboard(@Param('boardId') boardId: number) {
     return this.ideasService.getLeaderboard(boardId);
   }
 
-  // New route for searching ideas by title or description
+  //  route for searching ideas by title or description
   @Get('boards/:boardId/ideas/search')
   async search(
     @Param('boardId') boardId: number,

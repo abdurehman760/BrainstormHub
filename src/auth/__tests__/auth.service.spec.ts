@@ -151,7 +151,7 @@ describe('AuthService', () => {
         error: { message: 'Invalid credentials' },
       });
 
-      await expect(authService.login(email, password)).rejects.toThrow('Invalid credentials');
+      await expect(authService.login(email, password)).rejects.toThrow('Invalid login credentials');
     });
 
     it('should throw an error if login fails due to network or unexpected error', async () => {

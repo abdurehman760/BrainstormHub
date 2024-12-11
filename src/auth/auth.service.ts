@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { supabase } from '../config/supabase.config';
 import { UserService } from '../user/user.service';
@@ -15,7 +20,7 @@ export class AuthService {
     // Email format validation using regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      throw new Error('Invalid email format');
+      throw new BadRequestException('Invalid email format');
     }
 
     // Create user in Supabase Auth
@@ -25,14 +30,14 @@ export class AuthService {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw new InternalServerErrorException(error.message);
     }
 
     // Check if `data` contains the user
     const supabaseId = data?.user?.id;
 
     if (!supabaseId) {
-      throw new Error('User ID not found in Supabase response');
+      throw new InternalServerErrorException('User ID not found in Supabase response');
     }
 
     // Create the user in the database (using Prisma)
@@ -54,7 +59,7 @@ export class AuthService {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw new UnauthorizedException('Invalid login credentials');
     }
 
     const supabaseId = data?.user?.id;
@@ -69,7 +74,7 @@ export class AuthService {
     const { data, error } = await supabase.auth.getUser();
 
     if (error) {
-      throw new Error(error.message);
+      throw new UnauthorizedException(error.message);
     }
 
     return data?.user || null;
