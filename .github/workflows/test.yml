@@ -30,7 +30,6 @@ jobs:
           echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> $GITHUB_ENV
 
       # Install dependencies
       - name: Install dependencies
@@ -41,10 +40,6 @@ jobs:
       # Reset the database before running tests
       - name: Reset database before tests
         run: npx prisma migrate reset --force
-
-      # Clear Supabase authentication table before running tests
-      - name: Clear Supabase auth table before tests
-        run: node clear-supabase-auth.js
 
       # Apply Prisma migrations (this will set up the database schema)
       - name: Apply Prisma migrations
