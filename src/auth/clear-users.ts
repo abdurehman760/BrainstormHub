@@ -16,6 +16,7 @@ async function clearAuthUsers() {
       return;
     }
 
+    // Loop through users and delete them by ID
     for (const user of users.users) {
       console.log(`Deleting user with ID: ${user.id}`);
       const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
