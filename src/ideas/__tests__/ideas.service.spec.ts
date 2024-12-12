@@ -60,9 +60,10 @@ describe('IdeasService', () => {
     it('should throw an error if idea creation fails', async () => {
       const createIdeaDto = { title: 'New Idea', description: 'Idea Description' };
 
-      prismaService.idea.create = jest.fn().mockRejectedValue(new Error('Failed to create idea'));
+      // Mock Prisma Service to simulate failure
+      prismaService.board.findUnique = jest.fn().mockResolvedValue(null);  // Simulate board not found
 
-      await expect(ideasService.create(1, createIdeaDto)).rejects.toThrow('Failed to create idea');
+      await expect(ideasService.create(1, createIdeaDto)).rejects.toThrow('Board not found');
     });
   });
 
@@ -72,9 +73,10 @@ describe('IdeasService', () => {
       const updatedIdea = { id: 1, title: 'Updated Idea', description: 'Idea Description', boardId: 1 };
       const board = { id: 1, title: 'Board 1', user: { username: 'testuser' } };
 
-      // Mock Prisma Service
+      // Mock Prisma Service to simulate finding an idea
       prismaService.idea.update = jest.fn().mockResolvedValue(updatedIdea);
       prismaService.board.findUnique = jest.fn().mockResolvedValue(board);
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue(updatedIdea);  // Ensure idea is found
 
       // Mock ActivityGateway
       activityGateway.sendActivity = jest.fn();
@@ -94,9 +96,10 @@ describe('IdeasService', () => {
     it('should throw an error if idea update fails', async () => {
       const updateIdeaDto = { title: 'Updated Idea' };
 
-      prismaService.idea.update = jest.fn().mockRejectedValue(new Error('Failed to update idea'));
+      // Mock Prisma Service to simulate failure
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue(null);  // Simulate idea not found
 
-      await expect(ideasService.update(1, updateIdeaDto)).rejects.toThrow('Failed to update idea');
+      await expect(ideasService.update(1, updateIdeaDto)).rejects.toThrow('Idea not found');
     });
   });
 
@@ -105,9 +108,10 @@ describe('IdeasService', () => {
       const deletedIdea = { id: 1, title: 'Deleted Idea', description: 'Idea Description', boardId: 1 };
       const board = { id: 1, title: 'Board 1', user: { username: 'testuser' } };
 
-      // Mock Prisma Service
+      // Mock Prisma Service to simulate finding and deleting the idea
       prismaService.idea.delete = jest.fn().mockResolvedValue(deletedIdea);
       prismaService.board.findUnique = jest.fn().mockResolvedValue(board);
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue(deletedIdea);  // Ensure idea is found
 
       // Mock ActivityGateway
       activityGateway.sendActivity = jest.fn();
@@ -124,9 +128,10 @@ describe('IdeasService', () => {
     });
 
     it('should throw an error if idea deletion fails', async () => {
-      prismaService.idea.delete = jest.fn().mockRejectedValue(new Error('Failed to delete idea'));
+      // Mock Prisma Service to simulate failure
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue(null);  // Simulate idea not found
 
-      await expect(ideasService.remove(1)).rejects.toThrow('Failed to delete idea');
+      await expect(ideasService.remove(1)).rejects.toThrow('Idea not found');
     });
   });
 
@@ -191,3 +196,4 @@ describe('IdeasService', () => {
     });
   });
 });
+

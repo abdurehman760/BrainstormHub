@@ -73,9 +73,12 @@ describe('CommentsService', () => {
       const ideaId = 1;
       const userId = 1;
 
-      prismaService.comment.create = jest.fn().mockRejectedValue(new Error('Failed to create comment'));
+      // Mock Prisma Service: Simulate idea not found
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue(null);  // Make idea not found
 
-      await expect(commentsService.create(content, ideaId, userId)).rejects.toThrow('Failed to create comment');
+      await expect(commentsService.create(content, ideaId, userId))
+        .rejects
+        .toThrow('Idea not found'); // Expect "Idea not found" error here
     });
   });
 
@@ -84,6 +87,8 @@ describe('CommentsService', () => {
       const ideaId = 1;
       const comments = [{ id: 1, content: 'Comment 1', ideaId }, { id: 2, content: 'Comment 2', ideaId }];
 
+      // Mock the retrieval of the idea and comments
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue({ id: ideaId });  // Mock idea found
       prismaService.comment.findMany = jest.fn().mockResolvedValue(comments);
 
       const result = await commentsService.findAll(ideaId);
@@ -99,6 +104,8 @@ describe('CommentsService', () => {
     it('should return an empty list if no comments exist for the idea', async () => {
       const ideaId = 1;
 
+      // Mock the retrieval of the idea and simulate no comments found
+      prismaService.idea.findUnique = jest.fn().mockResolvedValue({ id: ideaId });  // Mock idea found
       prismaService.comment.findMany = jest.fn().mockResolvedValue([]);
 
       const result = await commentsService.findAll(ideaId);
@@ -112,3 +119,4 @@ describe('CommentsService', () => {
     });
   });
 });
+

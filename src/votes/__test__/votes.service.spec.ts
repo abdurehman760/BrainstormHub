@@ -3,6 +3,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { VotesService } from '../votes.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityGateway } from '../../activity/activity.gateway';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('VotesService', () => {
   let votesService: VotesService;
@@ -116,7 +117,7 @@ describe('VotesService', () => {
       // Test invalid vote value
       await expect(votesService.voteOnIdea(ideaId, value, supabaseId))
         .rejects
-        .toThrow('Invalid vote value. Please use 1 for upvote or -1 for downvote.');
+        .toThrowError(new BadRequestException('Invalid vote value. Please use 1 for upvote or -1 for downvote.'));
     });
 
     it('should throw an error if the user is not found', async () => {
@@ -129,10 +130,10 @@ describe('VotesService', () => {
 
       await expect(votesService.voteOnIdea(ideaId, value, supabaseId))
         .rejects
-        .toThrow('User not found');
+        .toThrowError(new NotFoundException('User not found'));
     });
 
-    it('should return a message if the idea is not found', async () => {
+    it('should throw a NotFoundException if the idea is not found', async () => {
       const ideaId = '1';
       const value = 1;
       const supabaseId = 'user123';
@@ -142,12 +143,10 @@ describe('VotesService', () => {
       prismaService.user.findUnique = jest.fn().mockResolvedValue(user);
       prismaService.idea.findUnique = jest.fn().mockResolvedValue(null);  // Idea not found
 
-      const result = await votesService.voteOnIdea(ideaId, value, supabaseId);
-
-      expect(result).toEqual({
-        message: 'Idea not found. Please check the idea ID and try again.',
-        success: false,
-      });
+      // Expect the function to throw a NotFoundException
+      await expect(votesService.voteOnIdea(ideaId, value, supabaseId))
+        .rejects
+        .toThrowError(new NotFoundException('Idea not found. Please check the idea ID and try again.'));
     });
   });
 });

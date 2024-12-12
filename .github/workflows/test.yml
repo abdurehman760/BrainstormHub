@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.18.0' 
+          node-version: '20.18.0'
 
       # Set up environment variables for Prisma and Supabase
       - name: Set up environment variables
@@ -30,12 +30,21 @@ jobs:
           echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> $GITHUB_ENV
 
       # Install dependencies
       - name: Install dependencies
         run: |
           npm install
           npx prisma generate  # Generate Prisma client
+
+      # Reset the database before running tests
+      - name: Reset database before tests
+        run: npx prisma migrate reset --force
+
+      # Clear Supabase authentication table before running tests
+      - name: Clear Supabase auth table before tests
+        run: node clear-supabase-auth.js
 
       # Apply Prisma migrations (this will set up the database schema)
       - name: Apply Prisma migrations
@@ -50,6 +59,6 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
 
-      # Optionally, reset the database after tests
-      - name: Reset database
+      # Reset the database after running tests
+      - name: Reset database after tests
         run: npx prisma migrate reset --force
