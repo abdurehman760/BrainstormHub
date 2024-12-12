@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ActivityGateway } from '../activity/activity.gateway';
 
@@ -16,17 +16,17 @@ export class VotesService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Validate the vote value to ensure it's -1 or 1
     if (value !== 1 && value !== -1) {
-      throw new Error(
+      throw new BadRequestException(
         'Invalid vote value. Please use 1 for upvote or -1 for downvote.',
       );
     }
 
-    // Fetch the idea details to include the title in the message
+    // Fetch the idea details
     const idea = await this.prisma.idea.findUnique({
       where: { id: Number(ideaId) },
       include: {
@@ -35,11 +35,7 @@ export class VotesService {
     });
 
     if (!idea) {
-      // If the idea is not found, return a user-friendly warning message instead of server error
-      return {
-        message: 'Idea not found. Please check the idea ID and try again.',
-        success: false,
-      };
+      throw new NotFoundException('Idea not found. Please check the idea ID and try again.');
     }
 
     // Check if the user has already voted on the idea
@@ -52,17 +48,17 @@ export class VotesService {
       },
     });
 
-    // Emit activity message with idea title and board title
+    // Handle vote updates or creation
     if (existingVote) {
-      // If a vote already exists, update the existing vote
       await this.prisma.vote.update({
         where: { id: existingVote.id },
         data: { value },
       });
 
-      // Send activity feed notification for updated vote
       this.activityGateway.sendActivity(
-        `${user.username} updated their vote on the idea: "${idea?.title}" to ${value === 1 ? 'upvote' : 'downvote'} in board: "${idea?.board.title}"`,
+        `${user.username} updated their vote on the idea: "${idea?.title}" to ${
+          value === 1 ? 'upvote' : 'downvote'
+        } in board: "${idea?.board.title}"`,
       );
 
       return {
@@ -70,24 +66,20 @@ export class VotesService {
         ideaId: Number(ideaId),
         newValue: value,
         success: true,
-      }; // Include updated details
+      };
     } else {
-      // If no vote exists, create a new vote record
       await this.prisma.vote.create({
         data: {
           value,
-          idea: {
-            connect: { id: Number(ideaId) }, // Connect the vote to the idea
-          },
-          user: {
-            connect: { id: user.id }, // Connect the vote to the user
-          },
+          idea: { connect: { id: Number(ideaId) } },
+          user: { connect: { id: user.id } },
         },
       });
 
-      // Send activity feed notification for new vote
       this.activityGateway.sendActivity(
-        `${user.username} voted on the idea: "${idea?.title}" with a ${value === 1 ? 'upvote' : 'downvote'} in board: "${idea?.board.title}"`,
+        `${user.username} voted on the idea: "${idea?.title}" with a ${
+          value === 1 ? 'upvote' : 'downvote'
+        } in board: "${idea?.board.title}"`,
       );
 
       return {
@@ -95,7 +87,7 @@ export class VotesService {
         ideaId: Number(ideaId),
         voteValue: value,
         success: true,
-      }; // Include added details
+      };
     }
   }
 }
