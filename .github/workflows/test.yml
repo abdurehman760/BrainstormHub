@@ -1,0 +1,47 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # You can adjust the version if needed
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          npm install
+          npx prisma generate  # Generate Prisma client
+
+      # Apply Prisma migrations (this will set up the database schema)
+      - name: Apply Prisma migrations
+        run: |
+          npx prisma migrate deploy  # Apply migrations to the database
+
+      # Run unit tests
+      - name: Run unit tests
+        run: npm run test
+
+      # Run e2e tests
+      - name: Run e2e tests
+        run: npm run test:e2e
+
+      # Optionally, reset the database after tests
+      - name: Reset database
+        run: npx prisma migrate reset --force
