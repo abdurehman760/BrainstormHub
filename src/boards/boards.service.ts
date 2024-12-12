@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -60,23 +60,34 @@ export class BoardsService {
   }
 
   // Update a board by ID
-  async update(id: number, updateBoardDto: UpdateBoardDto) {
-    const updatedBoard = await this.prisma.board.update({
-      where: { id: Number(id) },
-      data: updateBoardDto,
-    });
+ // Update a board by ID
+async update(id: number, updateBoardDto: UpdateBoardDto) {
+  // Check if the board exists before updating
+  const existingBoard = await this.prisma.board.findUnique({
+    where: { id: Number(id) },
+  });
 
-    // Emit a notification for board update
-    const user = await this.prisma.user.findUnique({
-      where: { id: updatedBoard.userId },
-    });
-
-    this.activityGateway.sendActivity(
-      `${user?.username} updated board: ${updatedBoard.title}`,
-    );
-
-    return updatedBoard;
+  if (!existingBoard) {
+    throw new NotFoundException(`Board with ID ${id} not found`);
   }
+
+  // Proceed with the update if the board exists
+  const updatedBoard = await this.prisma.board.update({
+    where: { id: Number(id) },
+    data: updateBoardDto,
+  });
+
+  // Emit a notification for board update
+  const user = await this.prisma.user.findUnique({
+    where: { id: updatedBoard.userId },
+  });
+
+  this.activityGateway.sendActivity(
+    `${user?.username} updated board: ${updatedBoard.title}`,
+  );
+
+  return updatedBoard;
+}
 
   // Delete a board by ID
   async remove(id: number) {

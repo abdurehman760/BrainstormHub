@@ -5,6 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityGateway } from '../../activity/activity.gateway';
 import { CreateBoardDto } from '../dto/create-board.dto';
 import { UpdateBoardDto } from '../dto/update-board.dto';
+import { NotFoundException } from '@nestjs/common';
 
 describe('BoardsService', () => {
   let boardsService: BoardsService;
@@ -169,35 +170,56 @@ describe('BoardsService', () => {
   describe('update', () => {
     it('should update a board and send a notification', async () => {
       const updateBoardDto: UpdateBoardDto = { title: 'Updated Title' };
+      const existingBoard = { id: 1, title: 'Old Title', description: 'Old Description', userId: 1 };
       const updatedBoard = { id: 1, title: 'Updated Title', description: 'Description 1', userId: 1 };
-
-      // Mock Prisma Service update method
+    
+      // Mock Prisma Service findUnique method to return the existing board
+      prismaService.board.findUnique = jest.fn().mockResolvedValue(existingBoard);
+    
+      // Mock Prisma Service update method to return the updated board
       prismaService.board.update = jest.fn().mockResolvedValue(updatedBoard);
-
+    
       // Mock user retrieval
       prismaService.user.findUnique = jest.fn().mockResolvedValue({ username: 'testuser' });
-
+    
       // Mock ActivityGateway
       activityGateway.sendActivity = jest.fn();
-
+    
       const result = await boardsService.update(1, updateBoardDto);
-
+    
+      expect(prismaService.board.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      
       expect(prismaService.board.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: updateBoardDto,
       });
+    
       expect(activityGateway.sendActivity).toHaveBeenCalledWith(
         'testuser updated board: Updated Title',
       );
+    
       expect(result).toEqual(updatedBoard);
     });
+    
 
-    it('should throw an error if board update fails', async () => {
+    it('should throw a NotFoundException if board does not exist', async () => {
       const updateBoardDto: UpdateBoardDto = { title: 'Updated Title' };
-
-      prismaService.board.update = jest.fn().mockRejectedValue(new Error('Failed to update board'));
-
-      await expect(boardsService.update(1, updateBoardDto)).rejects.toThrow('Failed to update board');
+    
+      // Mock the findUnique method to return null, simulating a non-existing board
+      prismaService.board.findUnique = jest.fn().mockResolvedValue(null);
+    
+      await expect(boardsService.update(1, updateBoardDto)).rejects.toThrow(
+        new NotFoundException('Board with ID 1 not found'),
+      );
+    
+      expect(prismaService.board.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+    
+      // Ensure the update method was not called
+      expect(prismaService.board.update).not.toHaveBeenCalled();
     });
   });
 
