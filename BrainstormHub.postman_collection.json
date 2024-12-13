@@ -1,0 +1,621 @@
+{
+	"info": {
+		"_postman_id": "f559099d-8222-4774-8697-42243ccbca8c",
+		"name": "BrainstormHub",
+		"description": "#### **Overview**:\n\nThe BrainstormHub API enables users to create, update, delete, and interact with ideas in a collaborative brainstorming platform. It supports user authentication, activity tracking, voting on ideas, and commenting.\n\nThis Postman collection includes the following key features:\n\n1. **Authentication**: User registration, login, and JWT token management.\n    \n2. **Idea Management**: Creating, updating, deleting, and viewing ideas for boards.\n    \n3. **Voting**: Upvoting and downvoting ideas on specific boards.\n    \n4. **Comments**: Adding and viewing comments on ideas.\n    \n5. **Activity Notifications**: Real-time notifications about actions on the platform.\n    \n6. **Leaderboard**: Retrieving a leaderboard showing ideas ranked by vote counts.\n    \n7. **Search**: Searching ideas by title or description within a specific board.\n    \n\n---\n\n### **Collection Structure**:\n\n#### **1\\. Authentication Endpoints**\n\n- **POST /auth/register**: Register a new user.\n    \n    - **Request Body**: User details such as username, password, email.\n        \n    - **Response**: Success or error message.\n        \n- **POST /auth/login**: Login and receive a JWT token.\n    \n    - **Request Body**: Username and password.\n        \n    - **Response**: JWT token for authentication in subsequent requests.\n        \n\n#### **2\\. Idea Management Endpoints**\n\n- **GET /boards/:boardId/ideas**: Fetch all ideas for a specific board.\n    \n    - **Request Param**: `boardId` - The ID of the board.\n        \n    - **Response**: List of ideas with details like title and description.\n        \n- **POST /boards/:boardId/ideas**: Create a new idea in a board.\n    \n    - **Request Param**: `boardId` - The ID of the board.\n        \n    - **Request Body**: Idea details (title, description).\n        \n    - **Response**: Newly created idea with ID, title, and description.\n        \n- **PUT /ideas/:id**: Update an existing idea by ID.\n    \n    - **Request Param**: `id` - The ID of the idea.\n        \n    - **Request Body**: Updated idea details (title, description).\n        \n    - **Response**: Updated idea details.\n        \n- **DELETE /ideas/:id**: Delete an idea by ID.\n    \n    - **Request Param**: `id` - The ID of the idea.\n        \n    - **Response**: Success message.\n        \n\n#### **3\\. Voting Endpoints**\n\n- **POST /ideas/:id/vote**: Vote on an idea.\n    \n    - **Request Param**: `id` - The ID of the idea.\n        \n    - **Request Body**: Vote value (-1 for downvote, 1 for upvote).\n        \n    - **Response**: Message indicating vote status (added or updated).\n        \n\n#### **4\\. Comment Management Endpoints**\n\n- **GET /ideas/:ideaId/comments**: Get all comments for a specific idea.\n    \n    - **Request Param**: `ideaId` - The ID of the idea.\n        \n    - **Response**: List of comments for the idea.\n        \n- **POST /ideas/:ideaId/comments**: Add a comment to an idea.\n    \n    - **Request Param**: `ideaId` - The ID of the idea.\n        \n    - **Request Body**: Comment content.\n        \n    - **Response**: The newly created comment.\n        \n\n#### **5\\. Leaderboard Endpoints**\n\n- **GET /boards/:boardId/ideas/leaderboard**: Get the leaderboard for a board's ideas based on votes.\n    \n    - **Request Param**: `boardId` - The ID of the board.\n        \n    - **Response**: List of ideas ranked by vote totals, with the number of positive and negative votes.\n        \n\n#### **6\\. Search Endpoints**\n\n- **GET /boards/:boardId/ideas/search**: Search ideas by title or description.\n    \n    - **Request Param**: `boardId` - The ID of the board.\n        \n    - **Request Query**: `query` - Search term.\n        \n    - **Response**: List of ideas matching the search query.\n        \n\n---\n\n### **Authentication Flow**:\n\n- **Login**: The user must log in first to receive a JWT token.\n    \n    - Use the `/auth/login` endpoint to get the token.\n        \n    - This token must be included in the `Authorization` header as `Bearer` for accessing protected routes such as creating ideas, posting comments, and voting.\n        \n\n---\n\n### **Example Use Cases**:\n\n#### **Create a New Idea**:\n\n1. Make a POST request to `/boards/1/ideas` to create an idea under board ID `1`.\n    \n2. jsonCopy code{ \"title\": \"New Idea for Board 1\", \"description\": \"This is a description of the new idea.\"}\n    \n\n#### **Vote on an Idea**:\n\n1. Make a POST request to `/ideas/1/vote` to vote on idea ID `1`.\n    \n2. jsonCopy code{ \"value\": 1}\n    \n\n#### **Add a Comment**:\n\n1. Make a POST request to `/ideas/1/comments` to comment on idea ID `1`.\n    \n2. jsonCopy code{ \"content\": \"This is my comment on the idea.\"}\n    \n\n---\n\n### **Real-Time Activity**:\n\n- WebSocket-based real-time notifications are handled via the `/ws` namespace.\n    \n- Example: After an action (like voting or commenting), the system broadcasts an activity message such as \"User X voted on Idea Y in Board Z.\"\n    \n\n---\n\n### **Notes**:\n\n- **JWT Authentication**: All endpoints that modify data (such as creating ideas, commenting, voting) require the user to be authenticated using JWT.\n    \n- **Error Handling**: Each endpoint returns appropriate error responses for missing resources (e.g., `404 Not Found` for missing ideas or users), invalid inputs, or unauthorized access.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32985753"
+	},
+	"item": [
+		{
+			"name": "http://localhost:3000/auth/register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n  \"email\": \"abdurehmankhan7601@gmail.com\",\r\n  \"password\": \"password123\",\r\n  \"username\": \"testuser\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/auth/login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// If the token is in a nested object or under a different name\r",
+							"const token = pm.response.json().accessToken; // Replace `access_token` with the correct field name\r",
+							"if (token) {\r",
+							"  pm.environment.set(\"authToken\", \"Bearer \" + token); // Prefix \"Bearer \" to the token\r",
+							"} else {\r",
+							"  console.log(\"Token not found in response\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"abdurehmankhan7601@gmail.com\",\r\n  \"password\": \"password123\",\r\n  \"username\": \"testuser\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/auth/me",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/auth/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"New Board Title\",\r\n  \"description\": \"This is a description of the new board\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/boards",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/boards",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 1,\r\n  \"title\": \"New Board Title\",\r\n  \"description\": \"This is a description of the new board\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/boards/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/search?query=New ",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/boards/search?query=New ",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"search"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "New "
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/1",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Updated Board Title\",\r\n  \"description\": \"Updated description\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/boards/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/1",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/boards/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/1/ideas",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"New Idea Title\",\r\n  \"description\": \"This is a detailed description of the new idea\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/boards/1/ideas",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1",
+						"ideas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/2/ideas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/boards/1/ideas",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1",
+						"ideas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/ideas/1",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Updated Idea Title\",\r\n  \"description\": \"Updated idea description\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/ideas/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"ideas",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/ideas/1",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/ideas/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"ideas",
+						"1"
+					],
+					"query": [
+						{
+							"key": "Authorization",
+							"value": "{{",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/2/ideas/leaderboard",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/boards/1/ideas/leaderboard",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1",
+						"ideas",
+						"leaderboard"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/boards/2/ideas/search?query=New",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/boards/1/ideas/search?query=New",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"boards",
+						"1",
+						"ideas",
+						"search"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "New"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/ideas/1/comments",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"content\": \"This is a comment on the idea\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/ideas/1/comments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"ideas",
+						"1",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/ideas/2/comments",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/ideas/1/comments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"ideas",
+						"1",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/ideas/2/vote",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"value\": 1\r\n}\r\n/*{\r\n  \"value\": -1\r\n}*/\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/ideas/1/vote",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"ideas",
+						"1",
+						"vote"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
