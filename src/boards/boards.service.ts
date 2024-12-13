@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -91,19 +91,32 @@ async update(id: number, updateBoardDto: UpdateBoardDto) {
 
   // Delete a board by ID
   async remove(id: number) {
-    const deletedBoard = await this.prisma.board.delete({
-      where: { id: Number(id) },
-    });
-
-    // Emit a notification for board deletion with dynamic activity
-    const user = await this.prisma.user.findUnique({
-      where: { id: deletedBoard.userId },
-    });
-
-    this.activityGateway.sendActivity(
-      `${user?.username} deleted board: ${deletedBoard.title}`,
-    );
-
-    return deletedBoard;
+    try {
+      const deletedBoard = await this.prisma.board.delete({
+        where: { id: Number(id) },
+      });
+  
+      // Emit a notification for board deletion with dynamic activity
+      const user = await this.prisma.user.findUnique({
+        where: { id: deletedBoard.userId },
+      });
+  
+      this.activityGateway.sendActivity(
+        `${user?.username} deleted board: ${deletedBoard.title}`,
+      );
+  
+      return deletedBoard;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        // Prisma error code for "Record not found"
+        throw new NotFoundException(`Board with ID ${id} not found`);
+      } else if (error.code === 'P2003') {
+        // Prisma error code for "Foreign key constraint failed"
+        throw new BadRequestException(
+          `Cannot delete board with ID ${id} because it is referenced by other records`,
+        );
+      }
+      throw error;
+    }
   }
 }

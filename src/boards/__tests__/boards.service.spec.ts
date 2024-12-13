@@ -5,7 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityGateway } from '../../activity/activity.gateway';
 import { CreateBoardDto } from '../dto/create-board.dto';
 import { UpdateBoardDto } from '../dto/update-board.dto';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('BoardsService', () => {
   let boardsService: BoardsService;
@@ -223,34 +223,76 @@ describe('BoardsService', () => {
     });
   });
 
-  describe('remove', () => {
-    it('should delete a board and send a notification', async () => {
-      const deletedBoard = { id: 1, title: 'Board 1', description: 'Description 1', userId: 1 };
 
-      // Mock Prisma Service delete method
-      prismaService.board.delete = jest.fn().mockResolvedValue(deletedBoard);
 
-      // Mock user retrieval
-      prismaService.user.findUnique = jest.fn().mockResolvedValue({ username: 'testuser' });
+describe('remove', () => {
+  it('should delete a board and send a notification', async () => {
+    const deletedBoard = { id: 1, title: 'Board 1', description: 'Description 1', userId: 1 };
 
-      // Mock ActivityGateway
-      activityGateway.sendActivity = jest.fn();
+    // Mock Prisma Service delete method
+    prismaService.board.delete = jest.fn().mockResolvedValue(deletedBoard);
 
-      const result = await boardsService.remove(1);
+    // Mock user retrieval
+    prismaService.user.findUnique = jest.fn().mockResolvedValue({ username: 'testuser' });
 
-      expect(prismaService.board.delete).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(activityGateway.sendActivity).toHaveBeenCalledWith(
-        'testuser deleted board: Board 1',
-      );
-      expect(result).toEqual(deletedBoard);
+    // Mock ActivityGateway
+    activityGateway.sendActivity = jest.fn();
+
+    const result = await boardsService.remove(1);
+
+    expect(prismaService.board.delete).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+    expect(activityGateway.sendActivity).toHaveBeenCalledWith(
+      'testuser deleted board: Board 1',
+    );
+    expect(result).toEqual(deletedBoard);
+  });
+
+  it('should throw a NotFoundException if the board does not exist', async () => {
+    // Mock Prisma Service delete method to throw a P2025 error (record not found)
+    prismaService.board.delete = jest.fn().mockRejectedValue({
+      code: 'P2025',
+      message: 'Record to delete not found',
     });
 
-    it('should throw an error if board deletion fails', async () => {
-      prismaService.board.delete = jest.fn().mockRejectedValue(new Error('Failed to delete board'));
+    await expect(boardsService.remove(1)).rejects.toThrow(
+      new NotFoundException('Board with ID 1 not found'),
+    );
 
-      await expect(boardsService.remove(1)).rejects.toThrow('Failed to delete board');
+    expect(prismaService.board.delete).toHaveBeenCalledWith({
+      where: { id: 1 },
     });
   });
+
+  it('should throw a BadRequestException if foreign key constraint fails', async () => {
+    // Mock Prisma Service delete method to throw a P2003 error (foreign key constraint violation)
+    prismaService.board.delete = jest.fn().mockRejectedValue({
+      code: 'P2003',
+      message: 'Foreign key constraint failed',
+    });
+
+    await expect(boardsService.remove(1)).rejects.toThrow(
+      new BadRequestException(
+        'Cannot delete board with ID 1 because it is referenced by other records',
+      ),
+    );
+
+    expect(prismaService.board.delete).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+  });
+
+  it('should throw a generic error if an unexpected error occurs', async () => {
+    // Mock Prisma Service delete method to throw a generic error
+    prismaService.board.delete = jest.fn().mockRejectedValue(new Error('Unexpected error'));
+
+    await expect(boardsService.remove(1)).rejects.toThrow('Unexpected error');
+
+    expect(prismaService.board.delete).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+  });
+});
+
 });
