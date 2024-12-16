@@ -59,10 +59,4 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
 
-      # Clear users after running tests
-      - name: Clear Supabase Auth Users after tests
-        run: npx ts-node src/auth/clear-users.ts
-
-      # Reset the database after running tests
-      - name: Reset database after tests
-        run: npx prisma migrate reset --force
+      
